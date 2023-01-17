@@ -1,0 +1,74 @@
+---
+- name: Install base VPN Utils
+  hosts: all
+  become: true
+  gather_facts: true
+  vars_files:
+    - defaults/main.yml
+  tasks:
+    - name: Install epel
+      yum:
+        name: epel-release
+        state: present
+    
+    - name: Install base tools
+      yum:
+        name:
+        - nano
+        - openvpn
+        - iperf3
+        state: present
+        update_cache: true
+
+    - name: Stop SELinux
+      shell:  setenforce 0
+
+- name: Configure VPN server
+  hosts: server
+  become: true
+  gather_facts: true
+  vars_files:
+    - defaults/main.yml
+  tasks:
+    - name: Generate key
+      shell: openvpn --genkey --secret /etc/openvpn/static.key
+
+    - name: Copy server config
+      template:
+        src: templates/server.conf.j2
+        dest: /etc/openvpn/server.conf
+
+    - name: Start openvpn service
+      service:
+        name: openvpn@server
+        state: started
+        enabled: true
+      
+    - name: Fetch static.key
+      fetch:
+        src: /etc/openvpn/static.key
+        dest: /tmp/
+        flat: yes
+
+- name: Configure VPN client
+  hosts: client
+  become: true
+  gather_facts: true
+  vars_files:
+    - defaults/main.yml
+  tasks:
+    - name: Copy static.key
+      template:
+        src: /tmp/static.key
+        dest: /etc/openvpn/
+
+    - name: Template client config
+      template:
+        src: templates/client.conf.j2
+        dest: /etc/openvpn/server.conf
+
+    - name: Start openvpn service
+      service:
+        name: openvpn@server
+        state: started
+        enabled: true
