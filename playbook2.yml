@@ -15,8 +15,8 @@
         - openvpn
         - easy-rsa
       
-    - name: Add route
-      shell: ip route add 192.168.10.0/24 via 192.168.10.1
+    # - name: Add route
+    #   shell: ip route add 192.168.10.0/24 via 192.168.10.1
 
     - name: Stop SELinux
       shell:  setenforce 0
@@ -47,7 +47,7 @@
 
     - name: Copy server configuration
       template:
-        src: template/server.conf.hw2.j2
+        src: templates/server.conf.hw2.j2
         dest: /etc/openvpn/server.conf
 
     - name: Iroute for client
@@ -61,15 +61,24 @@
     
     - name: Fetch files to host
       fetch:
-        src:
-        - /etc/openvpn/pki/ca.crt
-        - /etc/openvpn/pki/issued/client.crt
-        - /etc/openvpn/pki/private/client.key 
+        src: /etc/openvpn/pki/ca.crt
         dest: /tmp/
         flat: true
 
-    - name: Start openvpn
-      shell: openvpn --config /etc/openvpn/server.conf &
+    - name: Fetch files to host
+      fetch:
+        src: /etc/openvpn/pki/issued/client.crt
+        dest: /tmp/
+        flat: true
+
+    - name: Fetch files to host
+      fetch:
+        src: /etc/openvpn/pki/private/client.key
+        dest: /tmp/
+        flat: true
+
+    # - name: Start openvpn
+    #   shell: openvpn --config /etc/openvpn/server.conf &
 
     
     

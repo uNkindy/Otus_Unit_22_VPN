@@ -1,7 +1,7 @@
 ### Домашнее задание №22 (VPN)
 #### Часть 1. Тестирование туннеля openvpn
-1. Создан [Vagrantfile](), поднимающий 2 ВМ server, client;
-2. Написан [playbook](), который:
+1. Создан [Vagrantfile](https://github.com/uNkindy/Otus_Unit_22_VPN/blob/main/Vagrantfile), поднимающий 2 ВМ server, client;
+2. Написан [playbook](https://github.com/uNkindy/Otus_Unit_22_VPN/blob/main/playbook.yml), который:
 - устанавливвает необходимое ПО для стенда (epel-release, openvpn, iperf3);
 - раскатывает конфигурацию openvpn на сервер и клиент;
 - генерит ключ на сервере и пушит ключ на клиента;
@@ -68,7 +68,7 @@ Server listening on 5201
 ### Вывод: в режиме tul скорость работы туннеля выше.
 ___
 #### Часть 2. RAS на базе OpenVPN
-1. Написан playbook2 для создания туннеля на базе server;
+1. Написан [playbook2](https://github.com/uNkindy/Otus_Unit_22_VPN/blob/main/playbook2.yml) для создания туннеля на базе server;
 2. Подключаемся с хоста на ВМ server при помощи openvpn:
 ```console
 [root@devops tmp]# openvpn --config client.conf
