@@ -72,3 +72,9 @@
         name: openvpn@server
         state: started
         enabled: true
+
+  handlers:
+    - name: restart openvpn-server
+      service:
+        name: openvpn@server
+        state: restarted

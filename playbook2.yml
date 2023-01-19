@@ -1,0 +1,78 @@
+---
+- name: Install base VPN Utils
+  hosts: server
+  become: true
+  tasks:
+    - name: Install epel
+      yum:
+        name: epel-release
+        state: present
+
+    - name: Install base utils
+      yum:
+        name:
+        - nano
+        - openvpn
+        - easy-rsa
+      
+    - name: Add route
+      shell: ip route add 192.168.10.0/24 via 192.168.10.1
+
+    - name: Stop SELinux
+      shell:  setenforce 0
+
+    - name: Init PKI
+      shell: cd /etc/openvpn && /usr/share/easy-rsa/3.0.8/easyrsa init-pki
+
+    - name: Key generate 1 for server
+      shell: cd /etc/openvpn && echo 'rasvpn' | /usr/share/easy-rsa/3.0.8/easyrsa build-ca nopass
+
+    - name: Key generate 2 for server
+      shell: cd /etc/openvpn && echo 'rasvpn' | /usr/share/easy-rsa/3.0.8/easyrsa gen-req server nopass
+
+    - name: Key generate 3 for server
+      shell: cd /etc/openvpn && echo 'yes' | /usr/share/easy-rsa/3.0.8/easyrsa sign-req server server
+
+    - name: Key generate 4 for server
+      shell: cd /etc/openvpn && /usr/share/easy-rsa/3.0.8/easyrsa gen-dh
+
+    - name: Key generate 5 for server
+      shell: cd /etc/openvpn && openvpn --genkey --secret ta.key
+
+    - name: Key generate 1 for client
+      shell: cd /etc/openvpn && echo 'client' | /usr/share/easy-rsa/3/easyrsa gen-req client nopass
+
+    - name: Key generate 1 for client
+      shell: cd /etc/openvpn && echo 'yes' | /usr/share/easy-rsa/3/easyrsa sign-req client client
+
+    - name: Copy server configuration
+      template:
+        src: template/server.conf.hw2.j2
+        dest: /etc/openvpn/server.conf
+
+    - name: Iroute for client
+      shell: echo 'iroute 192.168.33.0 255.255.255.0' > /etc/openvpn/client/client
+
+    - name: Start openvpn service
+      service:
+        name: openvpn@server
+        state: started
+        enabled: true
+    
+    - name: Fetch files to host
+      fetch:
+        src:
+        - /etc/openvpn/pki/ca.crt
+        - /etc/openvpn/pki/issued/client.crt
+        - /etc/openvpn/pki/private/client.key 
+        dest: /tmp/
+        flat: true
+
+    - name: Start openvpn
+      shell: openvpn --config /etc/openvpn/server.conf &
+
+    
+    
+
+
+    
